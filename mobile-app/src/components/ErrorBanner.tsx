@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-#import { useQueryClient } from '@tanstack/react-query';
+// import { useQueryClient } from '@tanstack/react-query';
 import { useIsFetching, useQueryClient } from '@tanstack/react-query';
 import { NormalizedError } from '../utils/errorNormalizer';
 import { theme } from '../theme/colors';
@@ -18,6 +18,7 @@ const isRetryableStatus = (status: number) =>
 
 export const ErrorBanner: React.FC<ErrorBannerProps> = ({ error, onDismiss, onRetry }) => {
   const queryClient = useQueryClient();
+  const isRetrying = useIsFetching() > 0;
 
   if (!error) {
     return null;
@@ -31,9 +32,11 @@ export const ErrorBanner: React.FC<ErrorBannerProps> = ({ error, onDismiss, onRe
     onRetry ??
     (isRetryableStatus(error.status) && failedQueries.length > 0
       ? () => {
+          // Clear a failed mutation shown in this banner (e.g. a meal toggle), then re-fetch failed queries.
+          onDismiss?.();
           queryClient.refetchQueries({ predicate: (query) => query.state.status === 'error' });
         }
-      : undefined);
+      : undefined);  
 
   return (
     <View style={styles.container} accessibilityRole="alert" accessibilityLiveRegion="assertive">
@@ -43,11 +46,13 @@ export const ErrorBanner: React.FC<ErrorBannerProps> = ({ error, onDismiss, onRe
           {retry && (
             <TouchableOpacity
               onPress={retry}
-              style={styles.button}
+              disabled={isRetrying}
+              style={[styles.button, isRetrying && styles.buttonDisabled]}
               accessibilityRole="button"
               accessibilityLabel="Retry loading"
+              accessibilityState={{ disabled: isRetrying, busy: isRetrying }}
             >
-              <Text style={styles.buttonText}>Retry</Text>
+              <Text style={styles.buttonText}>{isRetrying ? 'Retrying…' : 'Retry'}</Text>
             </TouchableOpacity>
           )}
           {onDismiss && (
@@ -89,6 +94,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.md,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: theme.radius.sm,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
   buttonText: {
     color: theme.colors.onError,
