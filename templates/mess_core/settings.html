@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Settings | Mess Manager{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold">মেস সেটিংস / Mess Settings</h1>
+<form method="post" class="mt-6 max-w-2xl space-y-4 rounded-lg bg-white p-6 shadow-sm">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit" class="rounded bg-teal-700 px-4 py-2 text-white">সংরক্ষণ / Save</button>
+</form>
+{% endblock %}

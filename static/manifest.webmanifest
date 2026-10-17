@@ -1,0 +1,12 @@
+{
+  "name": "Mess Manager",
+  "short_name": "Mess Manager",
+  "start_url": "/dashboard/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f766e",
+  "description": "Meal, deposit, expense and bill management for your mess.",
+  "icons": [
+    {"src": "/static/icons/icon.svg", "sizes": "any", "type": "image/svg+xml"}
+  ]
+}

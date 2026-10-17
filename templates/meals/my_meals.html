@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}খাবার / Meals — Mess Manager{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <h1 class="text-2xl font-bold text-teal-800">খাবার <span class="text-base font-normal text-slate-500">Meals</span></h1>
+            <p class="text-sm text-slate-500">মাস: {{ month }}</p>
+        </div>
+        <div class="flex gap-2">
+            {% if can_view_summary %}
+            <a href="{% url 'meals:summary' %}?month={{ month }}" class="rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-sm text-teal-800 hover:bg-teal-100">
+                সবার হিসাব / Summary
+            </a>
+            {% endif %}
+            <form method="get" class="flex items-center gap-2">
+                <input type="month" name="month" value="{{ month }}" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                <button type="submit" class="rounded-lg bg-slate-700 px-3 py-2 text-sm text-white hover:bg-slate-600">দেখুন</button>
+            </form>
+        </div>
+    </div>
+
+    {% if past_cutoff %}
+    <div class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        কাটঅফ সময় ({{ cutoff_time|time:"H:i" }}) পেরিয়ে গেছে — আজ ও আগামীকালের খাবার বন্ধ করা যাবে না।
+        <span class="text-amber-700">After cutoff, today/tomorrow meal-off is locked.</span>
+    </div>
+    {% endif %}
+
+    <div class="space-y-3">
+        {% for meal in meals %}
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+                <p class="font-medium text-slate-800">{{ meal.date|date:"D, d M Y" }}</p>
+                <span class="text-xs text-slate-500">মোট / Total: {{ meal.total_meal_value }}</span>
+            </div>
+
+            {% if meal.date >= today %}
+            <div class="grid grid-cols-3 gap-2">
+                <form method="post" action="{% url 'meals:toggle' %}" class="text-center">
+                    {% csrf_token %}
+                    <input type="hidden" name="month" value="{{ month }}">
+                    <input type="hidden" name="date" value="{{ meal.date|date:'Y-m-d' }}">
+                    <input type="hidden" name="meal_type" value="breakfast">
+                    <input type="hidden" name="enabled" value="{% if not meal.breakfast %}true{% else %}false{% endif %}">
+                    <button type="submit" class="w-full rounded-lg px-2 py-3 text-sm font-medium {% if meal.breakfast %}bg-teal-600 text-white{% else %}bg-slate-100 text-slate-500{% endif %}">
+                        সকাল<br><span class="text-xs opacity-80">Breakfast</span>
+                    </button>
+                </form>
+                <form method="post" action="{% url 'meals:toggle' %}" class="text-center">
+                    {% csrf_token %}
+                    <input type="hidden" name="month" value="{{ month }}">
+                    <input type="hidden" name="date" value="{{ meal.date|date:'Y-m-d' }}">
+                    <input type="hidden" name="meal_type" value="lunch">
+                    <input type="hidden" name="enabled" value="{% if not meal.lunch %}true{% else %}false{% endif %}">
+                    <button type="submit" class="w-full rounded-lg px-2 py-3 text-sm font-medium {% if meal.lunch %}bg-teal-600 text-white{% else %}bg-slate-100 text-slate-500{% endif %}">
+                        দুপুর<br><span class="text-xs opacity-80">Lunch</span>
+                    </button>
+                </form>
+                <form method="post" action="{% url 'meals:toggle' %}" class="text-center">
+                    {% csrf_token %}
+                    <input type="hidden" name="month" value="{{ month }}">
+                    <input type="hidden" name="date" value="{{ meal.date|date:'Y-m-d' }}">
+                    <input type="hidden" name="meal_type" value="dinner">
+                    <input type="hidden" name="enabled" value="{% if not meal.dinner %}true{% else %}false{% endif %}">
+                    <button type="submit" class="w-full rounded-lg px-2 py-3 text-sm font-medium {% if meal.dinner %}bg-teal-600 text-white{% else %}bg-slate-100 text-slate-500{% endif %}">
+                        রাত<br><span class="text-xs opacity-80">Dinner</span>
+                    </button>
+                </form>
+            </div>
+            {% else %}
+            <div class="grid grid-cols-3 gap-2 text-center text-sm">
+                <span class="rounded-lg bg-slate-50 py-2 {% if meal.breakfast %}text-teal-700{% else %}text-slate-400{% endif %}">সকাল</span>
+                <span class="rounded-lg bg-slate-50 py-2 {% if meal.lunch %}text-teal-700{% else %}text-slate-400{% endif %}">দুপুর</span>
+                <span class="rounded-lg bg-slate-50 py-2 {% if meal.dinner %}text-teal-700{% else %}text-slate-400{% endif %}">রাত</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f766e">
+    <link rel="manifest" href="{% static 'manifest.webmanifest' %}">
+    <title>{% block title %}Mess Manager{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/dist.css' %}">
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900">
+    {% if user.is_authenticated %}
+    <nav class="bg-teal-700 text-white shadow-md relative z-50">
+        <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+            <a href="{% url 'dashboard:home' %}" class="text-lg font-semibold">মেস ম্যানেজার <span class="text-teal-200 text-sm font-normal">Mess Manager</span></a>
+            
+            <div class="flex items-center gap-3 text-sm">
+                <!-- সাধারণ ইউজারদের সাধারণ লিংকসমূহ -->
+                <a href="{% url 'meals:my_meals' %}" class="hidden sm:inline rounded bg-teal-600 px-3 py-1 hover:bg-teal-500">খাবার</a>
+                <a href="{% url 'deposits:my_deposits' %}" class="hidden sm:inline rounded bg-teal-600 px-3 py-1 hover:bg-teal-500">জমা</a>
+                <a href="{% url 'bills:my_bill' %}" class="hidden sm:inline rounded bg-teal-600 px-3 py-1 hover:bg-teal-500">বিল</a>
+                <a href="{% url 'complaints:my_complaints' %}" class="hidden sm:inline rounded bg-teal-600 px-3 py-1 hover:bg-teal-500">অভিযোগ</a>
+                <span class="hidden sm:inline text-teal-100 font-medium">{{ user.full_name }}</span>
+
+                <!-- লগআউট বাটন -->
+                <form method="post" action="{% url 'accounts:logout' %}" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="rounded bg-red-600 px-3 py-1 text-white hover:bg-red-500">লগআউট</button>
+                </form>
+
+                <!-- হ্যামবার্গার স্টাইল ড্রপডাউন -->
+                {% if user.is_super_manager or user.is_monthly_manager %}
+                <div style="position: relative; display: inline-block;">
+                    <button onclick="toggleDropdown(event)" type="button" class="rounded bg-teal-800 px-3 py-1.5 font-medium hover:bg-teal-600 focus:outline-none" style="display: flex; align-items: center; gap: 8px;">
+                        <!-- হ্যামবার্গার আইকন (Explicit size) -->
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                        <span>ম্যানেজমেন্ট</span>
+                    </button>
+                    
+                    <!-- ড্রপডাউন কন্টেন্ট (লম্বালম্বি লিস্ট) -->
+                    <div id="managerDropdown" style="display: none; position: absolute; right: 0; top: 100%; margin-top: 6px; width: 200px; background-color: #ffffff; color: #1e293b; border-radius: 6px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; z-index: 9999; flex-direction: column; padding: 6px 0;">
+                        <a href="{% url 'meals:daily_summary' %}" style="display: block; padding: 8px 16px; text-align: left;" class="hover:bg-teal-50 hover:text-teal-700">দৈনিক খাবার</a>
+                        <a href="{% url 'expenses:bazar_list' %}" style="display: block; padding: 8px 16px; text-align: left;" class="hover:bg-teal-50 hover:text-teal-700">বাজার</a>
+                        <a href="{% url 'deposits:pending' %}" style="display: block; padding: 8px 16px; text-align: left;" class="hover:bg-teal-50 hover:text-teal-700">জমা অনুমোদন</a>
+                        <a href="{% url 'complaints:all' %}" style="display: block; padding: 8px 16px; text-align: left;" class="hover:bg-teal-50 hover:text-teal-700">অভিযোগ ম্যানেজ</a>
+
+                        {% if user.is_super_manager %}
+                            <div style="border-top: 1px solid #e2e8f0; margin: 4px 0;"></div>
+                            <a href="{% url 'accounts:pending_users' %}" style="display: block; padding: 8px 16px; text-align: left;" class="hover:bg-teal-50 hover:text-teal-700">User Approvals</a>
+                            <a href="{% url 'mess_core:settings' %}" style="display: block; padding: 8px 16px; text-align: left;" class="hover:bg-teal-50 hover:text-teal-700">সেটিংস</a>
+                            <a href="{% url 'mess_core:manager' %}" style="display: block; padding: 8px 16px; text-align: left;" class="hover:bg-teal-50 hover:text-teal-700">ম্যানেজার</a>
+                            <a href="{% url 'mess_core:fixed_meal' %}" style="display: block; padding: 8px 16px; text-align: left;" class="hover:bg-teal-50 hover:text-teal-700">Fixed Meals</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <main class="mx-auto max-w-5xl px-4 py-6">
+        {% if messages %}
+        <div class="mb-4 space-y-2">
+            {% for message in messages %}
+            <div class="rounded-lg border px-4 py-3 text-sm {% if message.tags == 'error' %}border-red-200 bg-red-50 text-red-800{% elif message.tags == 'success' %}border-green-200 bg-green-50 text-green-800{% else %}border-blue-200 bg-blue-50 text-blue-800{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+</body>
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('{% static "sw.js" %}'));
+}
+
+function toggleDropdown(event) {
+    event.stopPropagation();
+    const dropdown = document.getElementById('managerDropdown');
+    if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+        dropdown.style.display = 'flex';
+    } else {
+        dropdown.style.display = 'none';
+    }
+}
+
+window.addEventListener('click', function() {
+    const dropdown = document.getElementById('managerDropdown');
+    if (dropdown) {
+        dropdown.style.display = 'none';
+    }
+});
+</script>
+</html>

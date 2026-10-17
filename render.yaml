@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: mess-manager-api
+    runtime: python
+    plan: free
+    buildCommand: bash build.sh
+    startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --timeout 120
+    healthCheckPath: /healthz/
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      # Supabase *Session pooler* connection string (port 5432). Set in the Render dashboard.
+      - key: DATABASE_URL
+        sync: false
+      # First Super Manager (created automatically on deploy if it does not exist yet).
+      - key: SUPERUSER_MOBILE
+        sync: false
+      - key: SUPERUSER_NAME
+        sync: false
+      - key: SUPERUSER_PASSWORD
+        sync: false

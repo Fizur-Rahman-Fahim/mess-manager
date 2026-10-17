@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}ড্যাশবোর্ড — Mess Manager{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h1 class="text-2xl font-bold text-teal-800">ড্যাশবোর্ড <span class="text-base font-normal text-slate-500">Dashboard</span></h1>
+        <p class="mt-2 text-slate-600">স্বাগতম, {{ user.full_name }}!</p>
+        <p class="text-sm text-slate-500">Role: {{ user.role_display }}</p>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+        <div class="rounded-xl border border-teal-200 bg-teal-50 p-4 shadow-sm">
+            <h2 class="font-semibold text-teal-900">এই মাসের সারাংশ / {{ current_month }}</h2>
+            <p class="mt-2 text-sm text-teal-800">Meal count: {{ meal_count }}</p>
+            {% if my_bill %}<p class="text-sm text-teal-800">Due: ৳{{ my_bill.total_due }} · Balance: ৳{{ my_bill.balance }}</p>{% else %}<p class="text-sm text-teal-700">Bill not generated yet.</p>{% endif %}
+            {% if active_manager %}<p class="mt-1 text-xs text-teal-700">Manager: {{ active_manager.user.full_name }}</p>{% endif %}
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <h2 class="font-semibold text-slate-800">খাবার <span class="text-sm font-normal text-slate-500">Meals</span></h2>
+            <p class="mt-1 text-sm text-slate-500">আজকের ও আগামীর খাবার চালু/বন্ধ করুন</p>
+            <a href="{% url 'meals:my_meals' %}" class="mt-3 inline-block text-sm font-medium text-teal-700 hover:underline">খাবার দেখুন / View meals →</a>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <h2 class="font-semibold text-slate-800">জমা <span class="text-sm font-normal text-slate-500">Deposits</span></h2>
+            <p class="mt-1 text-sm text-slate-500">টাকা জমা দিন ও অনুমোদন ট্র্যাক করুন</p>
+            <a href="{% url 'deposits:my_deposits' %}" class="mt-3 inline-block text-sm font-medium text-teal-700 hover:underline">জমা দেখুন / View deposits →</a>
+            {% if can_manage_deposits and pending_deposits_count %}
+            <a href="{% url 'deposits:pending' %}" class="mt-2 inline-block text-sm font-medium text-amber-700 hover:underline">
+                {{ pending_deposits_count }} অনুমোদন বাকি / pending
+            </a>
+            {% endif %}
+            {% if can_manage_expenses %}<p class="mt-2 text-sm text-slate-500">এই মাসের মোট: ৳{{ monthly_expense_total }}</p>{% endif %}
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <h2 class="font-semibold text-slate-800">বাজার <span class="text-sm font-normal text-slate-500">Bazar</span></h2>
+            <p class="mt-1 text-sm text-slate-500">মাসিক বাজার খরচ ও মিল রেট</p>
+            {% if can_manage_expenses %}
+            <a href="{% url 'expenses:bazar_list' %}" class="mt-3 inline-block text-sm font-medium text-teal-700 hover:underline">বাজার দেখুন / View bazar →</a>
+            {% else %}
+            <p class="mt-1 text-sm text-slate-400">ম্যানেজারের জন্য</p>
+            {% endif %}
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <h2 class="font-semibold text-slate-800">বিল <span class="text-sm font-normal text-slate-500">Bills</span></h2>
+            <p class="mt-1 text-sm text-slate-500">মাসিক বিল ও ব্যালেন্স দেখুন</p>
+            <a href="{% url 'bills:my_bill' %}" class="mt-3 inline-block text-sm font-medium text-teal-700 hover:underline">আমার বিল / My bill →</a>
+            {% if can_manage_deposits %}
+            <a href="{% url 'bills:summary' %}" class="mt-2 block text-sm font-medium text-teal-700 hover:underline">সবার বিল / All bills</a>
+            {% endif %}
+            {% if user.is_super_manager %}
+            <a href="{% url 'bills:manage' %}" class="mt-2 block text-sm font-medium text-teal-700 hover:underline">বিল ম্যানেজ / Manage bills</a>
+            {% endif %}
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <h2 class="font-semibold text-slate-800">অভিযোগ <span class="text-sm font-normal text-slate-500">Complaints</span></h2>
+            <p class="mt-1 text-sm text-slate-500">অভিযোগ জমা দিন ও অগ্রগতি দেখুন</p>
+            <a href="{% url 'complaints:my_complaints' %}" class="mt-3 inline-block text-sm font-medium text-teal-700 hover:underline">আমার অভিযোগ / My complaints →</a>
+            {% if can_manage_deposits %}
+            <a href="{% url 'complaints:all' %}" class="mt-2 block text-sm font-medium text-amber-700 hover:underline">ম্যানেজ / Manage{% if pending_complaints_count %} ({{ pending_complaints_count }} pending){% endif %}</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

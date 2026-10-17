@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags i18n %}
+
+{% block title %}বাজার খরচ যোগ / Add Bazar — Mess Manager{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-lg">
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h1 class="text-2xl font-bold text-teal-800">বাজার খরচ যোগ <span class="text-base font-normal text-slate-500">Add bazar expense</span></h1>
+        <p class="mt-1 text-sm text-slate-500">বড় বাজার বা ছোট বাজারের খরচ রেকর্ড করুন</p>
+
+        <form method="post" enctype="multipart/form-data" class="mt-6 space-y-4">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="w-full rounded-lg bg-teal-700 px-4 py-2.5 font-medium text-white hover:bg-teal-600">
+                সংরক্ষণ করুন / Save
+            </button>
+        </form>
+
+        <p class="mt-4 text-center text-sm text-slate-600">
+            <a href="{% url 'expenses:bazar_list' %}" class="font-medium text-teal-700 hover:underline">বাজার তালিকা / Bazar list</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

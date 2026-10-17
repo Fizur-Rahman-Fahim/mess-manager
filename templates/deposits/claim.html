@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags i18n %}
+
+{% block title %}জমা দিন / Claim Deposit — Mess Manager{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-md">
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h1 class="text-2xl font-bold text-teal-800">জমা দিন <span class="text-base font-normal text-slate-500">Claim deposit</span></h1>
+        <p class="mt-1 text-sm text-slate-500">ম্যানেজার অনুমোদনের পর ব্যালেন্সে যোগ হবে</p>
+
+        <form method="post" class="mt-6 space-y-4">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="w-full rounded-lg bg-teal-700 px-4 py-2.5 font-medium text-white hover:bg-teal-600">
+                জমার অনুরোধ পাঠান / Submit claim
+            </button>
+        </form>
+
+        <p class="mt-4 text-center text-sm text-slate-600">
+            <a href="{% url 'deposits:my_deposits' %}" class="font-medium text-teal-700 hover:underline">আমার জমা / My deposits</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

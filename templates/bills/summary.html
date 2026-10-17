@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}বিল হিসাব / Bill Summary — Mess Manager{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <h1 class="text-2xl font-bold text-teal-800">বিল হিসাব <span class="text-base font-normal text-slate-500">Bill summary</span></h1>
+            <p class="text-sm text-slate-500">মাস: {{ month }}</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <a href="{% url 'bills:my_bill' %}?month={{ month }}" class="rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50">আমার বিল</a>
+            {% if user.is_super_manager %}
+            <a href="{% url 'bills:manage' %}?month={{ month }}" class="rounded-lg bg-slate-700 px-3 py-2 text-sm text-white hover:bg-slate-600">ম্যানেজ</a>
+            {% endif %}
+            <form method="get" class="flex items-center gap-2">
+                <input type="month" name="month" value="{{ month }}" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                <button type="submit" class="rounded-lg bg-slate-700 px-3 py-2 text-sm text-white hover:bg-slate-600">দেখুন</button>
+            </form>
+        </div>
+    </div>
+
+    {% if cycle %}
+    <div class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+        মিল রেট: ৳{{ cycle.meal_rate }} · ভাড়া: ৳{{ cycle.house_rent_total }} · বিদ্যুৎ: ৳{{ cycle.electricity_bill_total }}
+    </div>
+    {% endif %}
+
+    <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+        <table class="min-w-full text-sm">
+            <thead class="bg-slate-50 text-left text-slate-600">
+                <tr>
+                    <th class="px-4 py-3">নাম</th>
+                    <th class="px-4 py-3">খাবার</th>
+                    <th class="px-4 py-3">সিট</th>
+                    <th class="px-4 py-3">কারেন্ট</th>
+                    <th class="px-4 py-3">ভাড়া</th>
+                    <th class="px-4 py-3">বিদ্যুৎ</th>
+                    <th class="px-4 py-3">বকেয়া</th>
+                    <th class="px-4 py-3">জমা</th>
+                    <th class="px-4 py-3">ব্যালেন্স</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for bill in bills %}
+                <tr>
+                    <td class="px-4 py-3 font-medium">{{ bill.user.full_name }}</td>
+                    <td class="px-4 py-3">৳{{ bill.meal_cost }}</td>
+                    <td class="px-4 py-3">৳{{ bill.seat_bill }}</td>
+                    <td class="px-4 py-3">৳{{ bill.current_bill_share }}</td>
+                    <td class="px-4 py-3">৳{{ bill.house_rent_share }}</td>
+                    <td class="px-4 py-3">৳{{ bill.electricity_share }}</td>
+                    <td class="px-4 py-3 font-medium">৳{{ bill.total_due }}</td>
+                    <td class="px-4 py-3">৳{{ bill.total_deposit }}</td>
+                    <td class="px-4 py-3 font-semibold {% if bill.balance < 0 %}text-red-700{% else %}text-green-700{% endif %}">৳{{ bill.balance }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="px-4 py-6 text-center text-slate-500">বিল জেনারেট হয়নি / Bills not generated yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if user.is_super_manager or user.is_monthly_manager %}
+    <form method="post" action="{% url 'bills:generate' %}" class="text-center">
+        {% csrf_token %}
+        <input type="hidden" name="month" value="{{ month }}">
+        <button type="submit" class="rounded-lg bg-teal-700 px-6 py-2.5 text-sm font-medium text-white hover:bg-teal-600">
+            বিল রিজেনারেট / Regenerate bills
+        </button>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

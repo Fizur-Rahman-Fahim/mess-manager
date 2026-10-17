@@ -1,0 +1,11 @@
+{
+  "name": "mess-manager",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i ./static/src/input.css -o ./static/css/dist.css --minify",
+    "watch:css": "tailwindcss -i ./static/src/input.css -o ./static/css/dist.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

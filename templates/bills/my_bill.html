@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}আমার বিল / My Bill — Mess Manager{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <h1 class="text-2xl font-bold text-teal-800">আমার বিল <span class="text-base font-normal text-slate-500">My bill</span></h1>
+            <p class="text-sm text-slate-500">মাস: {{ month }}</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            {% if can_manage %}
+            <a href="{% url 'bills:summary' %}?month={{ month }}" class="rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-sm text-teal-800 hover:bg-teal-100">
+                সবার বিল / All bills
+            </a>
+            {% if user.is_super_manager %}
+            <a href="{% url 'bills:manage' %}?month={{ month }}" class="rounded-lg bg-slate-700 px-3 py-2 text-sm text-white hover:bg-slate-600">
+                বিল ম্যানেজ / Manage
+            </a>
+            {% endif %}
+            {% endif %}
+            <form method="get" class="flex items-center gap-2">
+                <input type="month" name="month" value="{{ month }}" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                <button type="submit" class="rounded-lg bg-slate-700 px-3 py-2 text-sm text-white hover:bg-slate-600">দেখুন</button>
+            </form>
+        </div>
+    </div>
+
+    {% if cycle %}
+    <div class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+        মিল রেট: ৳{{ cycle.meal_rate }} · মোট খাবার: {{ cycle.total_meal_count }}
+    </div>
+    {% endif %}
+
+    {% if bill %}
+    <div class="grid gap-4 sm:grid-cols-2">
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p class="text-xs text-slate-500">সিট বিল / Seat</p>
+            <p class="text-lg font-semibold">৳{{ bill.seat_bill }}</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p class="text-xs text-slate-500">কারেন্ট বিল / Current</p>
+            <p class="text-lg font-semibold">৳{{ bill.current_bill_share }}</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p class="text-xs text-slate-500">বাসা ভাড়া / Rent</p>
+            <p class="text-lg font-semibold">৳{{ bill.house_rent_share }}</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p class="text-xs text-slate-500">বিদ্যুৎ / Electricity</p>
+            <p class="text-lg font-semibold">৳{{ bill.electricity_share }}</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p class="text-xs text-slate-500">খাবার খরচ / Meals</p>
+            <p class="text-lg font-semibold">৳{{ bill.meal_cost }}</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p class="text-xs text-slate-500">মোট বকেয়া / Total due</p>
+            <p class="text-lg font-bold text-slate-800">৳{{ bill.total_due }}</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p class="text-xs text-slate-500">জমা / Deposits</p>
+            <p class="text-lg font-semibold text-teal-700">৳{{ bill.total_deposit }}</p>
+        </div>
+        <div class="rounded-xl border p-4 shadow-sm {% if bill.balance < 0 %}border-red-200 bg-red-50{% else %}border-green-200 bg-green-50{% endif %}">
+            <p class="text-xs {% if bill.balance < 0 %}text-red-600{% else %}text-green-700{% endif %}">ব্যালেন্স / Balance</p>
+            <p class="text-2xl font-bold {% if bill.balance < 0 %}text-red-800{% else %}text-green-800{% endif %}">৳{{ bill.balance }}</p>
+            {% if bill.balance < 0 %}
+            <p class="text-xs text-red-600 mt-1">বাকি আছে / Amount due</p>
+            {% else %}
+            <p class="text-xs text-green-700 mt-1">অগ্রিম / Advance</p>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div class="rounded-xl border border-amber-200 bg-amber-50 p-6 text-center text-amber-800">
+        এই মাসের বিল এখনো জেনারেট হয়নি। ম্যানেজার বিল জেনারেট করলে দেখা যাবে।
+        <p class="mt-1 text-sm text-amber-700">Bill not generated for this month yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

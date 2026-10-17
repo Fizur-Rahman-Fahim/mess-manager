@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}বাজার খরচ / Bazar Expenses — Mess Manager{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <h1 class="text-2xl font-bold text-teal-800">বাজার খরচ <span class="text-base font-normal text-slate-500">Bazar expenses</span></h1>
+            <p class="text-sm text-slate-500">মাস: {{ month }}</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <a href="{% url 'expenses:bazar_add' %}" class="rounded-lg bg-teal-700 px-4 py-2 text-sm text-white hover:bg-teal-600">
+                খরচ যোগ করুন / Add expense
+            </a>
+            <form method="get" class="flex items-center gap-2">
+                <input type="month" name="month" value="{{ month }}" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                <button type="submit" class="rounded-lg bg-slate-700 px-3 py-2 text-sm text-white hover:bg-slate-600">দেখুন</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p class="text-xs text-slate-500">বড় বাজার / Boro</p>
+            <p class="text-xl font-bold text-slate-800">৳{{ boro_total }}</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p class="text-xs text-slate-500">ছোট বাজার / Choto</p>
+            <p class="text-xl font-bold text-slate-800">৳{{ choto_total }}</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p class="text-xs text-slate-500">মোট বাজার / Total bazar</p>
+            <p class="text-xl font-bold text-teal-700">৳{{ total_bazar }}</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p class="text-xs text-slate-500">মিল রেট / Meal rate</p>
+            <p class="text-xl font-bold text-teal-700">৳{{ meal_rate }}</p>
+            <p class="text-xs text-slate-400 mt-1">খাবার সংখ্যা: {{ total_meal_count }}</p>
+        </div>
+    </div>
+
+    <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+        <table class="min-w-full text-sm">
+            <thead class="bg-slate-50 text-left text-slate-600">
+                <tr>
+                    <th class="px-4 py-3">তারিখ</th>
+                    <th class="px-4 py-3">ধরন</th>
+                    <th class="px-4 py-3">টাকা</th>
+                    <th class="px-4 py-3">বিবরণ</th>
+                    <th class="px-4 py-3">যোগ করেছেন</th>
+                    <th class="px-4 py-3">রসিদ</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for expense in expenses %}
+                <tr>
+                    <td class="px-4 py-3">{{ expense.date|date:"d M Y" }}</td>
+                    <td class="px-4 py-3">{{ expense.bazar_type_display_bn }}</td>
+                    <td class="px-4 py-3 font-medium">৳{{ expense.amount }}</td>
+                    <td class="px-4 py-3 text-slate-500">{{ expense.description|default:"—" }}</td>
+                    <td class="px-4 py-3 text-slate-500">{{ expense.added_by.full_name }}</td>
+                    <td class="px-4 py-3">
+                        {% if expense.receipt_image %}
+                        <a href="{{ expense.receipt_image.url }}" target="_blank" class="text-teal-700 hover:underline">দেখুন</a>
+                        {% else %}—{% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-4 py-6 text-center text-slate-500">এই মাসে কোনো বাজার খরচ নেই / No bazar expenses.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
