@@ -34,7 +34,9 @@ export const ErrorBanner: React.FC<ErrorBannerProps> = ({ error, onDismiss, onRe
       ? () => {
           // Clear a failed mutation shown in this banner (e.g. a meal toggle), then re-fetch failed queries.
           onDismiss?.();
-          queryClient.refetchQueries({ predicate: (query) => query.state.status === 'error' });
+          failedQueries.forEach((query) => {
+            query.fetch(undefined, { cancelRefetch: true }).catch(() => undefined);
+          });
         }
       : undefined);  
 

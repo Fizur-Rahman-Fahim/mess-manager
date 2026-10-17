@@ -38,7 +38,8 @@ export const DepositsScreen: React.FC = () => {
   const [tab, setTab] = useState<'mine' | 'pending'>('mine');
   const { isManager } = useAuthStore();
   const mine = useMyDeposits(month);
-  const pending = usePendingDeposits(isManager() && tab === 'pending');
+  const pendingActive = isManager() && tab === 'pending';
+  const pending = usePendingDeposits(pendingActive);
   const claim = useClaimDeposit(month);
   const review = useDepositReview();
   const { control, handleSubmit, reset, setError } = useForm({
@@ -57,7 +58,7 @@ export const DepositsScreen: React.FC = () => {
     reset({ amount: '', date_claimed: currentDate(), note: '' });
   });
 
-  const error = (mine.error || pending.error || claim.error) as unknown as NormalizedError | undefined;
+  const error = (mine.error || (pendingActive ? pending.error : null) || claim.error) as unknown as NormalizedError | undefined;
 
   return (
     <KeyboardScrollView
@@ -67,7 +68,7 @@ export const DepositsScreen: React.FC = () => {
           refreshing={mine.isRefetching || pending.isRefetching}
           onRefresh={() => {
             mine.refetch();
-            if (isManager()) pending.refetch();
+            if (pendingActive) pending.refetch();
           }}
         />
       }

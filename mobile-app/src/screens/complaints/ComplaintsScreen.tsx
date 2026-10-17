@@ -34,7 +34,8 @@ export const ComplaintsScreen: React.FC = () => {
   const [tab, setTab] = useState<'mine' | 'all'>('mine');
   const { isManager } = useAuthStore();
   const mine = useMyComplaints();
-  const all = useAllComplaints(isManager() && tab === 'all');
+  const allActive = isManager() && tab === 'all';
+  const all = useAllComplaints(allActive);
   const create = useCreateComplaint();
   const updateStatus = useUpdateComplaintStatus();
   const { control, handleSubmit, reset, setError } = useForm({
@@ -53,7 +54,7 @@ export const ComplaintsScreen: React.FC = () => {
     reset();
   });
 
-  const error = (mine.error || all.error || create.error) as unknown as NormalizedError | undefined;
+  const error = (mine.error || (allActive ? all.error : null) || create.error) as unknown as NormalizedError | undefined;
 
   return (
     <KeyboardScrollView
@@ -63,7 +64,7 @@ export const ComplaintsScreen: React.FC = () => {
           refreshing={mine.isRefetching || all.isRefetching}
           onRefresh={() => {
             mine.refetch();
-            if (isManager()) all.refetch();
+            if (allActive) all.refetch();
           }}
         />
       }

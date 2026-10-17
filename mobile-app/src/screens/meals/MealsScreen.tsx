@@ -32,25 +32,27 @@ export const MealsScreen: React.FC = () => {
   const { isManager } = useAuthStore();
   const myMeals = useMyMeals(month);
   const toggle = useToggleMeal(month);
-  const summary = useMealSummary(month, isManager() && tab === 'summary');
-  const daily = useDailyMealSummary(month, isManager() && tab === 'daily');
+  const summaryActive = isManager() && tab === 'summary';
+  const dailyActive = isManager() && tab === 'daily';
+  const summary = useMealSummary(month, summaryActive);
+  const daily = useDailyMealSummary(month, dailyActive);
   const fixed = useFixedMeals(month, isManager());
   const setFixed = useSetFixedMeals(month);
   const [fixedCount, setFixedCount] = useState('');
 
   const refreshing = myMeals.isRefetching || summary.isRefetching || daily.isRefetching;
   const onRefresh = () => {
+    // Only refresh what is visible; refetching an inactive tab can leave a stale error behind.
     myMeals.refetch();
-    if (isManager()) {
-      summary.refetch();
-      daily.refetch();
-      fixed.refetch();
-    }
+    if (fixed) fixed.refetch();
+    if (summaryActive) summary.refetch();
+    if (dailyActive) daily.refetch();
   };
 
-  const error = (myMeals.error || summary.error || daily.error || toggle.error) as unknown as
-    | NormalizedError
-    | undefined;
+  const error = (myMeals.error ||
+    (summaryActive ? summary.error : null) ||
+    (dailyActive ? daily.error : null) ||
+    toggle.error) as unknown as NormalizedError | undefined;
 
   return (
     <KeyboardScrollView
