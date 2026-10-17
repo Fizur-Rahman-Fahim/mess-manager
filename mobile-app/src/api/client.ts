@@ -21,7 +21,7 @@ class ApiClient {
   constructor() {
     this.axiosInstance = axios.create({
       baseURL: API_BASE_URL,
-      timeout: 15000,
+      timeout: 45000,
     });
 
     this.setupInterceptors();
